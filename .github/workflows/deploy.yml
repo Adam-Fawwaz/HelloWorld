@@ -1,0 +1,33 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Copy files to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_KEY }}
+        source: "."
+        target: "/home/ubuntu/hello-python"
+
+    - name: SSH into EC2 and run the script
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          cd /home/ubuntu/hello-python
+          python3 hello.py
